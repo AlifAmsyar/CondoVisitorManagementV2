@@ -11,11 +11,8 @@ const credentials = 'X509-cert-8080500067161675844.pem';
 app.use(express.json())
 
 //MongoDB Setup Cert
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const client = new MongoClient('mongodb+srv://condovisitormanagement.xepoeto.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
-  tlsCertificateKeyFile: credentials,
-  serverApi: ServerApiVersion.v1
-});
+const { MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
+const uri = 'mongodb+srv://condovisitormanagement.xepoeto.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority';
 
 const swaggerUi = require('swagger-ui-express');
 
@@ -41,8 +38,7 @@ let hostCollection;
 let adminCollection;
 let securityCollection;
 
-
-MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, tlsCertificateKeyFile: credentials, serverApi: ServerApiVersion.v1 })
 .then(client => {
   console.log('Connected to MongoDB'); 
   const db = client.db('CondoVisitorManagement');

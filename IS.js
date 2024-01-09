@@ -12,7 +12,7 @@ app.use(express.json())
 
 //MongoDB Setup Cert
 const { MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
-const uri = ' ';
+const uri = 'mongodb+srv://condovisitormanagement.xepoeto.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority ';
 
 const swaggerUi = require('swagger-ui-express');
 

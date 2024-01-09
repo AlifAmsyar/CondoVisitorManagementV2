@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cjs": "^0.0.11",
+    "cors": "^2.8.5",
+    "credentials": "^3.0.2",
+    "express": "^4.18.2",
+    "install": "^0.13.0",
+    "jsdoc": "^4.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.3.0",
+    "node.js": "^0.0.1-security",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "name": "assignment",
+  "description": "��#\u0000 \u0000A\u0000s\u0000s\u0000i\u0000g\u0000n\u0000m\u0000e\u0000n\u0000t\u0000\r\u0000 \u0000#\u0000 \u0000A\u0000s\u0000s\u0000i\u0000g\u0000n\u0000m\u0000e\u0000n\u0000t\u0000\r\u0000 \u0000",
+  "version": "1.0.0",
+  "main": "IS.js",
+  "scripts": {
+    "start": "node IS.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "swagger-autogen": "^2.23.7"
+  },
+  "keywords": []
+}

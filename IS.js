@@ -5,14 +5,13 @@ const port = process.env.PORT || 2000;
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const credentials = 'X509-cert-8080500067161675844.pem';
 
 //express.json
 app.use(express.json())
 
-//MongoDB Setup Cert
-const { MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
-const uri = 'mongodb+srv://condovisitormanagement.xepoeto.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority ';
+// MongoDB setup
+const { MongoClient } = require('mongodb');
+const uri = 'mongodb+srv://AlifAmsyar:he3F6yvSR3OdCiyV@applicationcondo.zkxtny3.mongodb.net/?retryWrites=true&w=majority';
 
 const swaggerUi = require('swagger-ui-express');
 
@@ -38,7 +37,8 @@ let hostCollection;
 let adminCollection;
 let securityCollection;
 
-  MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, tlsCertificateKeyFile: credentials, serverApi: ServerApiVersion.v1 })
+
+MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 .then(client => {
   console.log('Connected to MongoDB'); 
   const db = client.db('CondoVisitorManagement');
@@ -46,7 +46,7 @@ let securityCollection;
   visitDetailCollection = db.collection('visitDetailCollectionName');
   hostCollection = db.collection('hostCollectionName');
   securityCollection = db.collection('securityCollectionName');
-  
+
   // Start the server or perform other operations
 
   const { ObjectId } = require('mongodb');
@@ -132,6 +132,11 @@ let securityCollection;
         throw new Error('Missing required fields');
       }
       
+      // Check password strength
+      if (!isStrongPassword(reqAdminPassword)) {
+        throw new Error('Password does not meet strength criteria');
+      }
+
       const hashedPassword = await bcrypt.hash(reqAdminPassword, 10);
 
       await adminCollection.insertOne({
@@ -151,28 +156,37 @@ let securityCollection;
   }
 
   //Function User Register
-  async function register(reqUsername, reqPassword, reqName, reqEmail, reqTel, reqAddress) {
+  async function register(reqUsername, reqPassword, reqname, reqemail, reqtel, reqaddress) {
     const client = new MongoClient(uri);
     try {
       await client.connect();
  
  
       // Validate the request payload
-      if (!reqUsername || !reqPassword || !reqName || !reqEmail || !reqTel || !reqAddress ) {
+      if (!reqUsername || !reqPassword || !reqname || !reqemail || !reqtel || !reqaddress ) {
         throw new Error('Missing required fields');
       }
 
+      // Check password strength
+      if (!isStrongPassword(reqPassword)) {
+        throw new Error('Your password must meet the following criteria:\n' +
+          '- At least 8 characters\n' +            // Comment: Minimum length
+          '- At least one uppercase letter\n' +    // Comment: Require an uppercase letter
+          '- At least one lowercase letter\n' +    // Comment: Require a lowercase letter
+          '- At least one number\n' +              // Comment: Require a number
+          '- At least one symbol');                 // Comment: Require a symbol
+      }
+
       const hashedPassword = await bcrypt.hash(reqPassword, 10);
-      
       const visitorPass = generateVisitorPass();
 
       await hostCollection.insertOne({
         Username: reqUsername,
         Password: hashedPassword,
-        name: reqName,
-        Tel: reqTel,
-        email: reqEmail,
-        address: reqAddress,
+        name: reqname,
+        Tel: reqtel,
+        email: reqemail,
+        address: reqaddress,
         visitorPass: visitorPass,
       });
  
@@ -197,6 +211,23 @@ let securityCollection;
     return pass;
   }
 
+    // Function to check if a password is strong//
+  function isStrongPassword(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasDigits = /\d/.test(password);
+    const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    return (
+      password.length >= minLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasDigits &&
+      hasSpecialChars
+    );
+  }
+
   //Function Generate Token
   function generateToken(user) {
     const payload = 
@@ -205,7 +236,7 @@ let securityCollection;
     };
     const token = jwt.sign
     (
-      payload, 'inipassword', 
+      payload, '20Pa@ssword', 
       { expiresIn: '1h' }
     );
     return token;
@@ -218,7 +249,7 @@ let securityCollection;
   
     let token = header.split(' ')[1];
   
-    jwt.verify(token, 'inipassword', function (err, decoded) {
+    jwt.verify(token, '20Pa@ssword', function (err, decoded) {
       if (err) {
         return res.status(401).send('Invalid Token');
       }
@@ -470,6 +501,10 @@ let securityCollection;
         throw new Error('Missing required fields');
       }
       
+      // Check password strength
+      if (!isStrongPassword(reqSecurityPassword)) {
+        throw new Error('Password does not meet strength criteria');
+      }
       const hashedPassword = await bcrypt.hash(reqSecurityPassword, 10);
 
       await securityCollection.insertOne({
@@ -495,7 +530,7 @@ let securityCollection;
     };
     const token = jwt.sign
     (
-      payload, 'inipassword', 
+      payload, 'itupassword', 
       { expiresIn: '1h' }
     );
     return token;
@@ -508,7 +543,7 @@ let securityCollection;
     
     let token = header.split(' ')[1];
     
-    jwt.verify(token, 'inipassword', function (err, decoded) {
+    jwt.verify(token, 'itupassword', function (err, decoded) {
       if (err) {
         return res.status(401).send('Invalid Token');
       }
@@ -597,7 +632,7 @@ app.get('/get-user-details/:identifier', verifyToken, verifySecurityToken, (req,
     });
 });
 
-// Visitor Get pass 
+// Visitor Get pass
 app.route('/get-visitor-pass/:hostId')
   .post((req, res) => {
     const hostId = req.params.hostId;
@@ -616,10 +651,10 @@ app.route('/get-visitor-pass/:hostId')
           return;
         }
 
-        // Generate a visitor pass
+        // Generate a new visitor pass
         const visitorPass = generateVisitorPass();
 
-        // Store the visitor pass in the database if needed
+        // Update the visitor pass in the database
         hostCollection.updateOne({ _id: new ObjectId(hostId) }, { $set: { visitorPass: visitorPass } });
 
         res.json({ visitorPass });
@@ -656,7 +691,6 @@ app.route('/get-visitor-pass/:hostId')
         res.status(500).send('An error occurred while getting the visitor pass');
       });
   });
-
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
